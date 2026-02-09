@@ -13,8 +13,7 @@
         .screen { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
         .active { display: flex; }
 
-        /* LOADING DIALOGUE STYLE */
-        #log-container { text-align: left; font-size: 14px; color: #00ff00; max-width: 400px; width: 100%; height: 200px; overflow: hidden; background: #000; border: 1px solid #333; padding: 10px; margin-top: 20px; }
+        #log-container { text-align: left; font-size: 14px; color: var(--red); max-width: 400px; width: 100%; height: 200px; overflow: hidden; background: #000; border: 1px solid #333; padding: 10px; margin-top: 20px; }
 
         .file-row { width: 100%; max-width: 400px; padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; opacity: 0.3; cursor: not-allowed; }
         .unlocked { opacity: 1; cursor: pointer; color: var(--red); border-left: 2px solid var(--red); }
@@ -26,7 +25,7 @@
 
         .sys-btn { margin-top: 40px; background: none; border: 1px solid var(--red); color: var(--red); padding: 10px 25px; cursor: pointer; display: none; text-transform: uppercase; }
         
-        .lock-icon { font-size: 50px; color: var(--red); margin-bottom: 20px; }
+        .lock-icon { font-size: 50px; color: var(--red); margin-bottom: 20px; cursor: pointer; }
         .timer { font-size: 2.5rem; color: var(--gray); margin-top: 20px; letter-spacing: 5px; }
     </style>
 </head>
@@ -35,9 +34,9 @@
 <div id="lines"></div>
 
 <section id="scr-lock" class="screen">
-    <div class="lock-icon">🔒</div>
+    <div class="lock-icon" onclick="devBypass()">🔒</div>
     <h2 id="lock-msg">SYSTEM TEMPORARILY ARCHIVED</h2>
-    <div id="timer" class="timer">00:00:00</div>
+    <div id="timer" class="timer">04:00:00</div>
     <button id="unlock-btn" class="sys-btn" onclick="startBootSequence()">[ ACCESS GRANTED ]</button>
 </section>
 
@@ -59,6 +58,7 @@
 
 <script>
     let currentLvl = parseInt(localStorage.getItem('owen_lvl')) || 1;
+    let clickCount = 0;
     const story = [
         "Everyone loved him. Friendly. Always floating around cracking jokes. Then one day... <span class='redact' onclick='revealName(this, 1)'>#####</span> stopped showing up.",
         "Zac was the last one to see him. They were at the bridge. Zac says he left early, but the cameras show him being followed by <span class='redact' onclick='revealName(this, 2)'>#####</span>.",
@@ -71,12 +71,18 @@
 
     function checkInitialState() {
         if (!localStorage.getItem('lock_time')) {
-            let target = new Date();
-            target.setDate(target.getDate() + 1);
-            target.setHours(17, 0, 0, 0); 
-            localStorage.setItem('lock_time', target.getTime());
+            let expiry = new Date().getTime() + (4 * 60 * 60 * 1000); // 4 Hours
+            localStorage.setItem('lock_time', expiry);
         }
         runClock();
+    }
+
+    function devBypass() {
+        clickCount++;
+        if (clickCount >= 3) {
+            localStorage.setItem('lock_time', new Date().getTime()); // Sets timer to now
+            location.reload();
+        }
     }
 
     function runClock() {
@@ -127,7 +133,7 @@
                 clearInterval(logInt);
                 setTimeout(() => { enterDirectory(); }, 1000);
             }
-        }, 600);
+        }, 400);
     }
 
     function showScreen(id) {
