@@ -5,39 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZAC_FILES_LEAK | SECURE_ACCESS</title>
     <style>
-        :root { --bg: #050505; --red: #ff0000; --gray: #333; --white: #d1d1d1; --font: 'Courier New', Courier, monospace; }
+        :root { --bg: #050505; --red: #ff0000; --gray: #888; --white: #e0e0e0; --font: 'Courier New', Courier, monospace; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--white); font-family: var(--font); overflow: hidden; }
         
-        /* SCANLINES */
         #lines { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), repeating-linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02)); background-size: 100% 3px, 2px 100%; pointer-events: none; z-index: 1000; }
 
         .screen { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
         .active { display: flex; }
 
-        /* BOOT LOG */
-        #log-container { text-align: left; font-size: 13px; color: var(--red); max-width: 450px; width: 90%; height: 180px; overflow: hidden; background: #000; border: 1px solid #1a1a1a; padding: 15px; margin-top: 20px; box-shadow: 0 0 15px rgba(255,0,0,0.1); }
+        #log-container { text-align: left; font-size: 13px; color: var(--red); max-width: 450px; width: 90%; height: 180px; overflow: hidden; background: #000; border: 1px solid #222; padding: 15px; margin-top: 20px; }
 
-        /* DIRECTORY */
-        .file-row { width: 100%; max-width: 450px; padding: 18px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; opacity: 0.2; cursor: not-allowed; transition: 0.3s; }
-        .unlocked { opacity: 1; cursor: pointer; color: var(--white); border-left: 3px solid var(--red); background: rgba(255,0,0,0.02); }
-        .unlocked:hover { background: rgba(255,0,0,0.08); color: var(--red); }
+        .file-row { width: 100%; max-width: 450px; padding: 18px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; opacity: 0.2; cursor: not-allowed; }
+        .unlocked { opacity: 1; cursor: pointer; color: var(--white); border-left: 3px solid var(--red); background: rgba(255,0,0,0.03); }
 
-        /* CONTENT */
-        #text-output { font-size: 1.05rem; line-height: 1.8; max-width: 650px; text-align: left; min-height: 250px; border-left: 1px solid #1a1a1a; padding-left: 20px; }
-        .redact { background: #222; color: #222; padding: 0 5px; cursor: pointer; transition: 0.1s; }
-        .revealed { background: transparent !important; color: var(--red) !important; font-weight: bold; text-shadow: 0 0 8px var(--red); animation: glitch 0.2s infinite; }
+        #text-output { font-size: 1.05rem; line-height: 1.8; max-width: 650px; text-align: left; min-height: 250px; border-left: 1px solid #222; padding-left: 20px; }
+        .redact { background: #333; color: #333; padding: 0 5px; cursor: pointer; }
+        .revealed { background: transparent !important; color: var(--red) !important; font-weight: bold; animation: glitch 0.2s infinite; }
         
-        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-2px, 1px); } 40% { transform: translate(-2px, -1px); } 60% { transform: translate(2px, 1px); } 80% { transform: translate(2px, -1px); } 100% { transform: translate(0); } }
+        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-2px, 1px); } 40% { transform: translate(-2px, -1px); } 60% { transform: translate(2px, 1px); } 100% { transform: translate(0); } }
 
-        .sys-btn { margin-top: 40px; background: none; border: 1px solid var(--red); color: var(--red); padding: 12px 30px; cursor: pointer; display: none; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; }
-        .sys-btn:hover { background: var(--red); color: #000; }
+        .sys-btn { margin-top: 40px; background: none; border: 1px solid var(--red); color: var(--red); padding: 12px 30px; cursor: pointer; display: none; text-transform: uppercase; letter-spacing: 3px; }
         
-        /* LOCK PAGE */
-        .lock-icon { font-size: 60px; color: var(--red); margin-bottom: 25px; cursor: pointer; opacity: 0.8; }
-        .timer { font-size: 3rem; color: #222; margin-top: 25px; letter-spacing: 8px; font-weight: bold; }
+        .lock-icon { font-size: 60px; color: var(--red); margin-bottom: 25px; cursor: pointer; z-index: 1001; }
+        /* BRIGHTER TIMER */
+        .timer { font-size: 3rem; color: var(--white); margin-top: 25px; letter-spacing: 8px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
 
-        /* FULL SCREEN FLASH */
-        #flash { position: fixed; inset: 0; background: var(--red); z-index: 2000; display: none; opacity: 0.8; }
+        #flash { position: fixed; inset: 0; background: var(--red); z-index: 2000; display: none; opacity: 0.9; }
     </style>
 </head>
 <body onload="checkInitialState()">
@@ -47,14 +40,14 @@
 
 <section id="scr-lock" class="screen">
     <div class="lock-icon" onclick="devBypass()">🔒</div>
-    <h2 id="lock-msg" style="letter-spacing: 5px; color: #555;">ENCRYPTED_ARCHIVE_LOCKED</h2>
+    <h2 id="lock-msg" style="letter-spacing: 5px; color: var(--red);">ENCRYPTED_ARCHIVE_LOCKED</h2>
     <div id="timer" class="timer">04:00:00</div>
     <button id="unlock-btn" class="sys-btn" onclick="startBootSequence()">[ DECRYPT SYSTEM ]</button>
 </section>
 
 <section id="scr-boot" class="screen">
     <div id="log-container"></div>
-    <p style="margin-top: 15px; font-size: 11px; color: #444; letter-spacing: 2px;">BYPASSING FIREWALL... DO NOT DISCONNECT</p>
+    <p style="margin-top: 15px; font-size: 11px; color: var(--gray);">BYPASSING FIREWALL... DO NOT DISCONNECT</p>
 </section>
 
 <section id="scr-dir" class="screen">
@@ -73,9 +66,113 @@
     let clickCount = 0;
     
     const story = [
-        "DOSSIER_001: Most people in town saw him as the perfect student, the perfect athlete, the perfect friend. He was the golden boy that everyone trusted implicitly. But Owen saw something else—a calculated coldness behind that practiced smile. While the rest of the world was blinded by the charm of <span class='redact' onclick='revealName(this, 1)'>ZAC</span>, Owen was busy cataloging the moments where the mask slipped. He didn't realize that by watching the hunter, he had become the prey.",
-        "DOSSIER_002: Owen vanished on a Tuesday evening after leaving the library. His car was found three miles away in a ditch, engine still warm, but Owen was gone. There were no signs of a struggle, no fingerprints, and no witnesses. The security footage showed a dark figure following him into the unlit section of the lot. That figure, moving with a predatory confidence that only one person possessed, was <span class='redact' onclick='revealName(this, 2)'>ZAC</span>. The police called it a 'missing persons' case; Owen knew it was a kidnapping.",
-        "DOSSIER_003: The search parties combed the woods for weeks, ignoring the obvious. They never checked the old storm cellar hidden beneath the floorboards of the guest house owned by <span class='redact' onclick='revealName(this, 3)'>ZAC</span>. It was a concrete tomb, soundproofed and freezing. Owen spent the first forty-eight hours in total darkness, listening to the heavy footsteps pacing above his head, knowing exactly who was standing on the other side of the hatch.",
-        "DOSSIER_004: We found Owen's broken glasses in a trash bin behind the gym, hidden deep beneath layers of waste. They were twisted and stained with copper-scented residue. When we checked the lockers, we found a pair of black tactical gloves inside the gym bag of <span class='redact' onclick='revealName(this, 4)'>ZAC</span>. He didn't even flinch when we showed them to him. He just smiled that golden-boy smile and told us Owen had probably just run away from the pressure.",
-        "DOSSIER_005: The basement was finally uncovered by a tip that came too late. Inside, they found a single chair bolted to the floor and a series of cameras mounted in the corners. It wasn't just a prison; it was a stage. On the workbench were dozens of polaroids of Owen in various states of distress, each one dated and signed in the handwriting of <span class='redact' onclick='revealName(this, 5)'>ZAC</span>. He wasn't just holding Owen; he was documenting the breaking of a human spirit.",
-        "DOS
+        "DOSSIER_001: Most people saw him as the golden boy. He was the athlete, the friend, the person everyone trusted implicitly. But Owen saw the truth—a calculated coldness behind that practiced smile. While the world was blinded by the charm of <span class='redact' onclick='revealName(this, 1)'>ZAC</span>, Owen was cataloging the moments where the mask slipped. He didn't realize that by watching the hunter, he had become the prey.",
+        "DOSSIER_002: Owen vanished on a Tuesday. His car was found in a ditch, engine still warm, but Owen was gone. Security footage showed a dark figure following him into the unlit section of the lot. That figure, moving with a predatory confidence that only one person possessed, was <span class='redact' onclick='revealName(this, 2)'>ZAC</span>. The police called it a 'missing persons' case; Owen knew it was his end.",
+        "DOSSIER_003: They never checked the old storm cellar hidden beneath the floorboards of the house owned by <span class='redact' onclick='revealName(this, 3)'>ZAC</span>. It was a concrete tomb, soundproofed and freezing. Owen spent forty-eight hours in total darkness, listening to the heavy footsteps pacing above his head, knowing exactly who was standing on the other side of the hatch.",
+        "DOSSIER_004: We found Owen's broken glasses twisting deep in a trash bin. When we checked the lockers, we found black tactical gloves inside the bag of <span class='redact' onclick='revealName(this, 4)'>ZAC</span>. He didn't flinch. He just smiled that golden-boy smile and told us Owen had probably just run away from the pressure.",
+        "DOSSIER_005: The basement was a stage. Inside, they found a single chair and cameras mounted in the corners. There were polaroids of Owen in distress, each one dated and signed by <span class='redact' onclick='revealName(this, 5)'>ZAC</span>. He wasn't just holding Owen; he was documenting the breaking of a spirit.",
+        "DOSSIER_006: A recovered recorder revealed Owen's final words. He spoke of the psychological games, the way his captor would sit in the corner and describe how his family had stopped looking. Owen whispers the name <span class='redact' onclick='revealName(this, 6)'>ZAC</span> just as the door begins to creak open one last time.",
+        "DOSSIER_007: The data leak has been detected. The one who built this archive is no longer in control. Owen is gone, and the predator is looking for a new subject. Check the locks on your doors. The person who has been watching you this entire time is <span class='redact' onclick='revealName(this, 7)'>ZAC</span>."
+    ];
+
+    function checkInitialState() {
+        if (!localStorage.getItem('lock_time')) {
+            localStorage.setItem('lock_time', new Date().getTime() + (4 * 60 * 60 * 1000));
+        }
+        runClock();
+    }
+
+    function devBypass() {
+        clickCount++;
+        if (clickCount >= 3) {
+            localStorage.setItem('lock_time', new Date().getTime());
+            location.reload();
+        }
+    }
+
+    function runClock() {
+        showScreen('scr-lock');
+        const timerElement = document.getElementById('timer');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const clockInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const end = localStorage.getItem('lock_time');
+            const diff = end - now;
+            if (diff <= 0) {
+                clearInterval(clockInterval);
+                timerElement.innerText = "00:00:00";
+                if (localStorage.getItem('final_done') !== 'true') unlockBtn.style.display = "block";
+                return;
+            }
+            const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+            timerElement.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
+    }
+
+    function startBootSequence() {
+        showScreen('scr-boot');
+        const log = document.getElementById('log-container');
+        const lines = ["> BOOT_LOADER_V.4.0", "> CONNECTING...", "> BYPASSING Z_AUTH...", "> ACCESSING RECORDS...", "> DECRYPTING...", "> WELCOME_USER."];
+        let i = 0;
+        const logInt = setInterval(() => {
+            log.innerHTML += lines[i] + "<br>";
+            i++;
+            if(i >= lines.length) { clearInterval(logInt); setTimeout(() => { enterDirectory(); }, 1200); }
+        }, 400);
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function enterDirectory() { showScreen('scr-dir'); renderDir(); }
+
+    function renderDir() {
+        const container = document.getElementById('dir-container');
+        container.innerHTML = "";
+        for (let i = 1; i <= 7; i++) {
+            const row = document.createElement('div');
+            row.className = `file-row ${i <= currentLvl ? 'unlocked' : ''}`;
+            row.innerHTML = `<span>RECORD_00${i}</span> <span>${i <= currentLvl ? '[READ]' : '[LOCKED]'}</span>`;
+            if (i <= currentLvl) row.onclick = () => openFile(i - 1);
+            container.appendChild(row);
+        }
+    }
+
+    function openFile(idx) {
+        showScreen('scr-view');
+        const out = document.getElementById('text-output');
+        document.getElementById('next-btn').style.display = "none";
+        document.getElementById('final-btn').style.display = "none";
+        let i = 0; let fullHtml = story[idx]; out.innerHTML = "";
+        const typeTimer = setInterval(() => {
+            i++;
+            if (fullHtml.charAt(i) === '<') i = fullHtml.indexOf('>', i) + 1;
+            out.innerHTML = fullHtml.substring(0, i);
+            if (i >= fullHtml.length) clearInterval(typeTimer);
+        }, 25);
+    }
+
+    function revealName(el, num) {
+        if (num === 7) {
+            document.getElementById('flash').style.display = 'block';
+            setTimeout(() => { document.getElementById('flash').style.display = 'none'; }, 150);
+        }
+        el.innerText = "ZAC"; el.className = "revealed";
+        if (num === 7) { document.getElementById('final-btn').style.display = "block"; }
+        else { if (num === currentLvl) { currentLvl++; localStorage.setItem('zac_lvl', currentLvl); } document.getElementById('next-btn').style.display = "block"; }
+    }
+
+    function backToDir() { enterDirectory(); }
+
+    function finalLock() {
+        localStorage.setItem('final_done', 'true');
+        localStorage.setItem('lock_time', new Date().getTime() + (4 * 60 * 60 * 1000));
+        document.getElementById('lock-msg').innerText = "SYSTEM_WIPED_BY_ZAC";
+        document.getElementById('unlock-btn').style.display = "none";
+        runClock();
+    }
+</script>
+</body>
+</html>
