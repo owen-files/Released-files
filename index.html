@@ -1,37 +1,52 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TERMINAL | ZAC_V3</title>
+    <title>TERMINAL | ZAC_V_FINAL</title>
     <style>
-        :root { --bg: #050505; --red: #ff0000; --gray: #333; --white: #eee; --font: 'Courier New', Courier, monospace; }
+        :root { --bg: #050505; --red: #ff0000; --white: #eee; --font: 'Courier New', Courier, monospace; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--white); font-family: var(--font); overflow: hidden; }
         
-        #lines { position: fixed; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px); pointer-events: none; z-index: 1000; }
+        #lines { position: fixed; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2) 0px, rgba(0,0,0,0.2) 1px, transparent 1px, transparent 2px); pointer-events: none; z-index: 1000; }
 
-        .screen { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+        .screen { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
         .active { display: flex; }
 
-        #log-container { text-align: left; font-size: 13px; color: var(--red); width: 300px; height: 160px; overflow: hidden; margin: 20px 0; border-left: 1px solid var(--red); padding-left: 15px; }
+        /* THE GLOWING BOX */
+        .terminal-box {
+            background: rgba(10, 10, 10, 0.9);
+            border: 2px solid var(--red);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4), inset 0 0 15px rgba(255, 0, 0, 0.2), 10px 10px 30px rgba(0,0,0,1);
+            max-width: 800px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
 
-        .file-row { width: 100%; max-width: 400px; padding: 20px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; opacity: 0.15; transition: 0.4s; }
-        .unlocked { opacity: 1; cursor: pointer; color: var(--white); }
+        .glow-text { text-shadow: 0 0 10px rgba(255, 0, 0, 0.4); }
 
-        #text-output { font-size: 1.1rem; line-height: 1.8; max-width: 600px; text-align: left; min-height: 200px; }
-        
-        /* THE HOVER REDACT STYLE */
-        .redact { color: #111; background: #111; padding: 0 4px; cursor: pointer; display: inline; transition: background 0.3s, color 0.3s; position: relative; }
-        .redact:hover { background: #1a1a1a; color: #444; } /* Peek on hover */
-        .revealed { color: var(--red) !important; background: transparent !important; font-weight: bold; animation: glitch 0.3s infinite; }
-        
-        @keyframes glitch { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        #log-container { text-align: left; font-size: 13px; color: var(--red); width: 280px; height: 150px; overflow: hidden; margin: 20px 0; padding-left: 15px; }
 
-        .sys-btn { margin-top: 40px; background: transparent; border: 1px solid var(--red); color: var(--red); padding: 12px 30px; cursor: pointer; display: none; text-transform: uppercase; letter-spacing: 4px; font-size: 11px; }
-        .sys-btn:hover { background: var(--red); color: #000; }
+        .file-row { width: 100%; max-width: 400px; padding: 15px 0; display: flex; justify-content: space-between; cursor: pointer; transition: 0.3s; color: var(--white); border-bottom: 1px solid #1a1a1a; }
+        .file-row:hover { color: var(--red); text-shadow: 0 0 10px var(--red); }
+
+        #text-output { font-size: 1.1rem; line-height: 1.8; text-align: left; min-height: 220px; width: 100%; }
         
-        .lock-icon { font-size: 50px; color: var(--red); margin-bottom: 20px; cursor: pointer; }
-        .timer { font-size: 3.5rem; color: var(--red); letter-spacing: 10px; font-weight: 200; text-shadow: 0 0 10px rgba(255,0,0,0.3); }
+        .redact { color: #111; background: #111; padding: 0 4px; cursor: pointer; display: inline; transition: 0.1s; border-radius: 2px; }
+        .revealed { color: var(--red) !important; background: transparent !important; font-weight: bold; animation: glitch 0.3s infinite; text-shadow: 0 0 8px var(--red); }
+        
+        @keyframes glitch { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .sys-btn { margin-top: 30px; background: transparent; border: 1px solid var(--red); color: var(--red); padding: 12px 30px; cursor: pointer; display: none; text-transform: uppercase; letter-spacing: 4px; font-size: 11px; box-shadow: 0 0 10px rgba(255,0,0,0.2); }
+        .sys-btn:hover { background: var(--red); color: #000; box-shadow: 0 0 20px var(--red); }
+        
+        .lock-icon { font-size: 50px; color: var(--red); margin-bottom: 20px; cursor: pointer; filter: drop-shadow(0 0 10px rgba(255,0,0,0.5)); }
+        .timer { font-size: 3rem; color: var(--red); letter-spacing: 8px; font-weight: 200; text-shadow: 0 0 15px rgba(255,0,0,0.5); margin: 10px 0; }
 
         #flash { position: fixed; inset: 0; background: var(--red); z-index: 2000; display: none; }
     </style>
@@ -42,39 +57,48 @@
 <div id="flash"></div>
 
 <section id="scr-lock" class="screen">
-    <div class="lock-icon" onclick="devBypass()">🔒</div>
-    <div id="timer" class="timer">04:00:00</div>
-    <p id="lock-msg" style="color: #444; font-size: 10px; letter-spacing: 2px; margin-top: 20px;">ACCESS_RESTRICTED</p>
-    <button id="unlock-btn" class="sys-btn" onclick="startBootSequence()">[ DECRYPT ]</button>
+    <div class="terminal-box">
+        <div class="lock-icon" onclick="devBypass()">🔒</div>
+        <div id="timer" class="timer">04:00:00</div>
+        <p id="lock-msg" class="glow-text" style="color: #444; font-size: 10px; letter-spacing: 2px;">ENCRYPTED_DATA_LOCK</p>
+        <button id="unlock-btn" class="sys-btn" onclick="startBootSequence()">[ DECRYPT ]</button>
+    </div>
 </section>
 
 <section id="scr-boot" class="screen">
-    <div id="log-container"></div>
+    <div class="terminal-box">
+        <div id="log-container" class="glow-text"></div>
+    </div>
 </section>
 
 <section id="scr-dir" class="screen">
-    <h1 style="font-size: 12px; letter-spacing: 8px; color: #444; margin-bottom: 40px;">DIRECTORY_INDEX</h1>
-    <div id="dir-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+    <div class="terminal-box">
+        <h1 class="glow-text" style="font-size: 12px; letter-spacing: 8px; color: #444; margin-bottom: 20px;">INDEX_ROOT</h1>
+        <div id="dir-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+    </div>
 </section>
 
 <section id="scr-view" class="screen">
-    <div id="text-output"></div>
-    <button id="next-btn" class="sys-btn" onclick="backToDir()">[ RETURN ]</button>
-    <button id="final-btn" class="sys-btn" onclick="finalLock()">[ PURGE ]</button>
+    <div class="terminal-box">
+        <div id="text-output" class="glow-text"></div>
+        <div style="display:flex; gap: 20px;">
+            <button id="next-btn" class="sys-btn" onclick="backToDir()">[ RETURN ]</button>
+            <button id="final-btn" class="sys-btn" onclick="finalLock()">[ PURGE ]</button>
+        </div>
+    </div>
 </section>
 
 <script>
-    let currentLvl = parseInt(localStorage.getItem('zac_lvl')) || 1;
     let clickCount = 0;
     
     const story = [
-        "DOSSIER_001: Most people saw him as the golden boy. He was the athlete, the friend, the person everyone trusted implicitly. But Owen saw the truth—a calculated coldness behind that practiced smile. While the world was blinded by the charm of <span class='redact' onclick='revealName(this, 1)'>ZAC</span>, Owen was cataloging the moments where the mask slipped. He didn't realize that by watching the hunter, he had become the prey.",
-        "DOSSIER_002: Owen vanished on a Tuesday. His car was found in a ditch, engine still warm, but Owen was gone. Security footage showed a dark figure following him into the unlit section of the lot. That figure, moving with a predatory confidence that only one person possessed, was <span class='redact' onclick='revealName(this, 2)'>ZAC</span>. The police called it a 'missing persons' case; Owen knew it was his end.",
-        "DOSSIER_003: They never checked the old storm cellar hidden beneath the floorboards of the house owned by <span class='redact' onclick='revealName(this, 3)'>ZAC</span>. It was a concrete tomb, soundproofed and freezing. Owen spent forty-eight hours in total darkness, listening to the heavy footsteps pacing above his head, knowing exactly who was standing on the other side of the hatch.",
-        "DOSSIER_004: We found Owen's broken glasses twisting deep in a trash bin. When we checked the lockers, we found black tactical gloves inside the bag of <span class='redact' onclick='revealName(this, 4)'>ZAC</span>. He didn't flinch. He just smiled that golden-boy smile and told us Owen had probably just run away from the pressure.",
-        "DOSSIER_005: The basement was a stage. Inside, they found a single chair and cameras mounted in the corners. There were polaroids of Owen in distress, each one dated and signed by <span class='redact' onclick='revealName(this, 5)'>ZAC</span>. He wasn't just holding Owen; he was documenting the breaking of a spirit.",
-        "DOSSIER_006: A recovered recorder revealed Owen's final words. He spoke of the psychological games, the way his captor would sit in the corner and describe how his family had stopped looking. Owen whispers the name <span class='redact' onclick='revealName(this, 6)'>ZAC</span> just as the door begins to creak open one last time.",
-        "DOSSIER_007: The data leak has been detected. The one who built this archive is no longer in control. Owen is gone, and the predator is looking for a new subject. Check the locks on your doors. The person who has been watching you this entire time is <span class='redact' onclick='revealName(this, 7)'>ZAC</span>."
+        "DOSSIER_001: Most people saw him as the golden boy. He was the athlete, the friend, the person everyone trusted implicitly. But Owen saw the truth—a calculated coldness behind that practiced smile. While the world was blinded by the charm of <span class='redact' onclick='revealName(this, 1)'>#####</span>, Owen was cataloging the moments where the mask slipped. He didn't realize that by watching the hunter, he had become the prey.",
+        "DOSSIER_002: Owen vanished on a Tuesday. His car was found in a ditch, engine still warm, but Owen was gone. Security footage showed a dark figure following him into the unlit section of the lot. That figure, moving with a predatory confidence that only one person possessed, was <span class='redact' onclick='revealName(this, 2)'>#####</span>. The police called it a 'missing persons' case; Owen knew it was his end.",
+        "DOSSIER_003: They never checked the old storm cellar hidden beneath the floorboards of the house owned by <span class='redact' onclick='revealName(this, 3)'>#####</span>. It was a concrete tomb, soundproofed and freezing. Owen spent forty-eight hours in total darkness, listening to the heavy footsteps pacing above his head, knowing exactly who was standing on the other side of the hatch.",
+        "DOSSIER_004: We found Owen's broken glasses twisting deep in a trash bin. When we checked the lockers, we found black tactical gloves inside the bag of <span class='redact' onclick='revealName(this, 4)'>#####</span>. He didn't flinch. He just smiled that golden-boy smile and told us Owen had probably just run away from the pressure.",
+        "DOSSIER_005: The basement was a stage. Inside, they found a single chair and cameras mounted in the corners. There were polaroids of Owen in distress, each one dated and signed by <span class='redact' onclick='revealName(this, 5)'>#####</span>. He wasn't just holding Owen; he was documenting the breaking of a spirit.",
+        "DOSSIER_006: A recovered recorder revealed Owen's final words. He spoke of the psychological games, the way his captor would sit in the corner and describe how his family had stopped looking. Owen whispers the name <span class='redact' onclick='revealName(this, 6)'>#####</span> just as the door begins to creak open one last time.",
+        "DOSSIER_007: The data leak has been detected. The one who built this archive is no longer in control. Owen is gone, and the predator is looking for a new subject. Check the locks on your doors. The person who has been watching you this entire time is <span class='redact' onclick='revealName(this, 7)'>#####</span>."
     ];
 
     function checkInitialState() {
@@ -115,13 +139,13 @@
     function startBootSequence() {
         showScreen('scr-boot');
         const log = document.getElementById('log-container');
-        const lines = ["> MNT/SYSCALL", "> BYPASSING_Z_AUTH", "> REC_RECOVERY...", "> DEC_STREAM_ACTIVE", "> SUCCESS."];
+        const lines = ["> CONNECTING...", "> BYPASS_ACTIVE", "> RECOVERING_ALL_FILES", "> ACCESS_GRANTED."];
         let i = 0;
         const logInt = setInterval(() => {
             log.innerHTML += lines[i] + "<br>";
             i++;
             if(i >= lines.length) { clearInterval(logInt); setTimeout(() => { enterDirectory(); }, 800); }
-        }, 250);
+        }, 200);
     }
 
     function showScreen(id) {
@@ -136,9 +160,9 @@
         container.innerHTML = "";
         for (let i = 1; i <= 7; i++) {
             const row = document.createElement('div');
-            row.className = `file-row ${i <= currentLvl ? 'unlocked' : ''}`;
-            row.innerHTML = `<span>DOSSIER_00${i}</span> <span>${i <= currentLvl ? '[READY]' : '[ENC]'}</span>`;
-            if (i <= currentLvl) row.onclick = () => openFile(i - 1);
+            row.className = `file-row glow-text`;
+            row.innerHTML = `<span>RECORD_00${i}</span> <span>[READY]</span>`;
+            row.onclick = () => openFile(i - 1);
             container.appendChild(row);
         }
     }
@@ -164,13 +188,11 @@
         if (num === 7) {
             document.getElementById('flash').style.display = 'block';
             setTimeout(() => { document.getElementById('flash').style.display = 'none'; }, 150);
+            document.getElementById('final-btn').style.display = "block";
+        } else {
+            document.getElementById('next-btn').style.display = "block";
         }
         el.innerText = "ZAC"; el.className = "revealed";
-        if (num === 7) { document.getElementById('final-btn').style.display = "block"; }
-        else { 
-            if (num === currentLvl) { currentLvl++; localStorage.setItem('zac_lvl', currentLvl); } 
-            document.getElementById('next-btn').style.display = "block"; 
-        }
     }
 
     function backToDir() { enterDirectory(); }
@@ -179,7 +201,7 @@
         localStorage.setItem('final_done', 'true');
         localStorage.setItem('lock_time', new Date().getTime() + (4 * 60 * 60 * 1000));
         clickCount = 0;
-        document.getElementById('lock-msg').innerText = "SYSTEM_PURGED";
+        document.getElementById('lock-msg').innerText = "SYSTEM_WIPE_COMPLETE";
         document.getElementById('unlock-btn').style.display = "none";
         runClock();
     }
